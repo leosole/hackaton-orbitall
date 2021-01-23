@@ -1,13 +1,13 @@
 {
-  "name": "customers",
+  "name": "cards",
   "version": "0.0.1",
-  "description": "How to create an API using Node.js",
+  "description": "Cards API using Node.js",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: There isn't any kind of test in this project\" && exit 1",
     "start": "node server.js"
   },
-  "author": "leandrocapuano@gmail.com",
+  "author": "leosole@poli.ufrj.br",
   "license": "MIT",
   "dependencies": {
     "body-parser": "^1.12.3",
