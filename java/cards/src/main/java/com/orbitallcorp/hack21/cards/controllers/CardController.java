@@ -49,11 +49,15 @@ public class CardController {
     @PutMapping("/{id}")
     public ResponseEntity<Card> updateById(@PathVariable Long id, @RequestBody Card card) {
         card.setId(id);
-        Card updatedCard = cardService.updateById(id, card);
-        if (updatedCard != null){
-            return new ResponseEntity(updatedCard, HttpStatus.OK);
+        String cardNumber = card.getCardNumber();
+        if( cardNumberIsValid(cardNumber) ) {  // testa se cartão tem quantidade certa de dígitos
+            Card updatedCard = cardService.updateById(id, card);
+            if (updatedCard != null) {
+                return new ResponseEntity(updatedCard, HttpStatus.OK);
+            }
+            return new ResponseEntity(card, HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity(card, HttpStatus.NOT_FOUND);
+        return new ResponseEntity(card, HttpStatus.BAD_REQUEST);
     }
 
     @GetMapping("/{id}")
