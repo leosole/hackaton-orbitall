@@ -67,7 +67,7 @@ api.save = (request, response) => {
     response.status(400)
     response.json({ 'mensagem': message })
   } else if(!checkFields(canonical)){
-    const message = 'Erro ao salvar card. Campo faltando'
+    const message = 'Erro ao salvar card. Cheque os campos'
     console.log(message)
     response.status(400)
     response.json({ 'mensagem': message })
@@ -103,14 +103,10 @@ function checkFields(card) {
                 "motherName",
                 "address",
                 "city"]
-  // for(var field in fields){
-  //   console.log(field)
-  //   if(!(field in card)){
-  //     return false
-  //   }
-  // }
+  if (Object.keys(card).length != 7){
+    return false
+  }
   return fields.every(item => card.hasOwnProperty(item))
-  // return true
 }
 
 module.exports = api
