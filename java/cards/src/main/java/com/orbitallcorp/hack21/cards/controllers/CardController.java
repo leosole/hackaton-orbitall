@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
+import org.apache.commons.lang3.math.NumberUtils;
 
 import java.util.List;
 
@@ -16,10 +17,21 @@ public class CardController {
     @Autowired
     private CardService cardService;
 
+    public boolean cardNumberIsValid(String cardNumber){
+        cardNumber = cardNumber.replaceAll("\\s",""); // remove espaços em branco
+        if(cardNumber.length() == 16 && NumberUtils.isNumber(cardNumber) ) {
+            return true;
+        }
+        return false;
+    }
     @PostMapping
     public ResponseEntity<Card> save(@RequestBody Card card) {
-        Card savedCard = cardService.save((card));
-        return new ResponseEntity(savedCard, HttpStatus.CREATED);
+        String cardNumber = card.getCardNumber();
+        if( cardNumberIsValid(cardNumber) ) {  // testa se cartão tem quantidade certa de dígitos
+            Card savedCard = cardService.save((card));
+            return new ResponseEntity(savedCard, HttpStatus.CREATED);
+        }
+        return new ResponseEntity(null, HttpStatus.BAD_REQUEST);
     }
 
     @GetMapping
