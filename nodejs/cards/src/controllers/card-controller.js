@@ -14,7 +14,6 @@ api.findAll = (request, response) => {
 }
 
 api.findById = (request, response) => {
-  console.log(request.params.id)
   neDB.find({ _id:request.params.id }, (exception, cards) => {
         if (exception) {
             const message = 'Erro ao procurar card ' + request.params.id
@@ -28,16 +27,23 @@ api.findById = (request, response) => {
 
 api.updateById = ( request, response) => {
     const canonical = request.body
-    neDB.update({ _id:request.params.id }, canonical, (exception, card) => {
-        if (exception) {
-            const message = 'Erro ao salvar card'
-            console.log(message, exception)
-            response.status(exception.status | 400)
-            response.json({ 'mensagem': message })
-        }
-        response.status(200)
-        response.json(card)
-    })
+    if(!cardIsValid(canonical.cardNumber)){
+      const message = 'Erro ao alterar card. Número inválido'
+      console.log(message)
+      response.status(400)
+      response.json({ 'mensagem': message })
+    } else {
+      neDB.update({ _id:request.params.id }, canonical, (exception, card) => {
+          if (exception) {
+              const message = 'Erro ao alterar card'
+              console.log(message, exception)
+              response.status(exception.status | 400)
+              response.json({ 'mensagem': message })
+          }
+          response.status(201)
+          response.json(card)
+      })
+    }
 }
 
 api.deleteById = ( request, response) => {
@@ -55,15 +61,56 @@ api.deleteById = ( request, response) => {
 
 api.save = (request, response) => {
   const canonical = request.body
-  neDB.insert(canonical, (exception, card) => {
-      if (exception) {
-          const message = 'Erro ao alterar card'
-          console.log(message, exception)
-          response.status(exception.status | 400)
-          response.json({ 'mensagem': message })
-      }
-      response.status(201)
-      response.json(card)
-  })
+  if(!cardIsValid(canonical.cardNumber)){
+    const message = 'Erro ao salvar card. Número inválido'
+    console.log(message)
+    response.status(400)
+    response.json({ 'mensagem': message })
+  } else if(!checkFields(canonical)){
+    const message = 'Erro ao salvar card. Campo faltando'
+    console.log(message)
+    response.status(400)
+    response.json({ 'mensagem': message })
+  } else {
+    neDB.insert(canonical, (exception, card) => {
+        if (exception) {
+            const message = 'Erro ao salvar card'
+            console.log(message, exception)
+            response.status(exception.status | 400)
+            response.json({ 'mensagem': message })
+        }
+        response.status(201)
+        response.json(card)
+    })
+  }
 }
+
+function cardIsValid(cardNumber) {
+  if(typeof cardNumber == "string" && !isNaN(cardNumber)){
+    cardNumber = cardNumber.replace(/\s/g,'') // remover espaços
+    if(cardNumber.length == 16){
+      return true
+    }
+  }
+  return false
+}
+
+function checkFields(card) {
+  var fields = ["cardNumber",
+                "embossName",
+                "customerName",
+                "documentNumber",
+                "motherName",
+                "address",
+                "city"]
+  // for(var field in fields){
+  //   console.log(field)
+  //   if(!(field in card)){
+  //     return false
+  //   }
+  // }
+  return fields.every(item => card.hasOwnProperty(item))
+  // return true
+}
+
 module.exports = api
